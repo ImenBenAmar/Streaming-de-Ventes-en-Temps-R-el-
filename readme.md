@@ -46,4 +46,8 @@ pip install kafka-python pyspark
 
 ### 🎬Demo
 
-- [Voir la démo (demo.mp4)](./dashbord_temp_relle.mp4)
+- [Voir la démo (demo.mp4)](./images/dashbord_temp_relle.mp4)
+
+![Data ](./images/sample_data.png)
+![Dashbord](./images/dashbord.png)
+![Dashbord_sql ](./images/dashbord_sql.png)
