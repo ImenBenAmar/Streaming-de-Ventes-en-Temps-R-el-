@@ -43,3 +43,7 @@ pip install delta-spark
 
 # 4. Python packages
 pip install kafka-python pyspark
+
+### 🎬Demo
+
+- [Voir la démo (demo.mp4)](./dashbord_temp_relle.mp4)
