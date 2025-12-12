@@ -621,4 +621,3 @@ Pour toute question ou suggestion :
 **⭐ Si ce projet vous a été utile, n'hésitez pas à lui donner une étoile ! ⭐**
 
 </div>
->>>>>>> 86ca2d0cfa54fc72d4a1773f345c09e116392acc
