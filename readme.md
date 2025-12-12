@@ -173,6 +173,233 @@ pip install kafka-python pyspark delta-spark
 
 ### 4️⃣ Télécharger les JARs nécessaires
 
+<<<<<<< HEAD
+```bash
+# Delta Lake
+wget https://repo1.maven.org/maven2/io/delta/delta-core_2.12/2.4.0/delta-core_2.12-2.4.0.jar
+
+# Kafka pour Spark
+wget https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.12/3.5.0/spark-sql-kafka-0-10_2.12-3.5.0.jar
+```
+
+---
+
+## 🚀 Utilisation
+
+### Étape 1 : Démarrer Kafka
+
+```bash
+# Terminal 1 : Démarrer ZooKeeper
+zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties
+
+# Terminal 2 : Démarrer Kafka
+kafka-server-start /usr/local/etc/kafka/server.properties
+
+# Terminal 3 : Créer le topic
+kafka-topics --create --topic ventes_stream --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
+```
+
+### Étape 2 : Lancer le Producteur
+
+```bash
+# Terminal 4
+python producer_ventes.py
+```
+
+**Sortie attendue :**
+```
+Vente envoyée : {'id_vente': 1234, 'produit': 'Smartphone', 'quantite': 3, 'prix_unitaire': 599.99, 'pays': 'France', 'segment': 'Particulier', 'timestamp': '2025-12-12T10:30:45.123456'}
+Vente envoyée : {'id_vente': 5678, 'produit': 'Ordinateur', 'quantite': 1, 'prix_unitaire': 899.50, 'pays': 'Allemagne', 'segment': 'Entreprise', 'timestamp': '2025-12-12T10:30:47.654321'}
+```
+
+### Étape 3 : Lancer le Streaming Spark
+
+```bash
+# Terminal 5
+spark-submit \
+  --packages io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0 \
+  spark_streaming_delta.py
+```
+
+**Logs attendus :**
+```
+Starting Spark Structured Streaming...
+Bronze checkpoint: C:/tmp/delta/bronze/checkpoint
+Silver checkpoint: C:/tmp/delta/silver/checkpoint
+Processing batch 1...
+Processing batch 2...
+```
+
+### Étape 4 : Lancer le Dashboard
+
+```bash
+# Terminal 6
+python dashboard_query.py
+```
+
+**Sortie dashboard :**
+```
+DASHBOARD EN TEMPS RÉEL - CA PAR PAYS/SEGMENT
+================================================================================
+
+MISE À JOUR : 10:35:22
+--------------------------------------------------------------------------------
++----------+-----------+-----------------+
+|pays      |segment    |ca_total         |
++----------+-----------+-----------------+
+|France    |Entreprise |15678.45         |
+|Allemagne |Particulier|12345.90         |
+|Espagne   |Éducation  |9876.20          |
++----------+-----------+-----------------+
+```
+
+---
+
+## 📁 Structure du Projet
+
+```
+streaming-ventes-temps-reel/
+│
+├── 📄 producer_ventes.py          # Générateur de ventes simulées
+├── 📄 spark_streaming_delta.py    # Pipeline Spark Streaming
+├── 📄 dashboard_query.py          # Dashboard temps réel
+│
+├── 📂 data/
+│   ├── 🥉 bronze/                 # Couche Bronze (raw)
+│   │   ├── ventes/                # Tables Delta
+│   │   └── checkpoint/            # Points de reprise
+│   │
+│   └── 🥈 silver/                 # Couche Silver (enriched)
+│       ├── ventes_agg/            # Tables Delta enrichies
+│       └── checkpoint/            # Points de reprise
+│
+├── 📂 images/
+│   ├── demo.mp4                   # Vidéo de démonstration
+│   ├── sample_data.png            # Exemple de données
+│   ├── dashbord.png               # Dashboard principal
+│   └── dashbord_sql.png           # Requêtes SQL
+│
+└── 📄 README.md                   # Documentation (ce fichier)
+```
+
+---
+
+## 📊 Résultats
+
+### 🎬 Démonstration Vidéo
+
+[▶️ Voir la démo complète (demo.mp4)](./images/dashbord_temp_relle.mp4)
+
+### 📸 Captures d'Écran
+
+#### Exemple de Données Streamées
+![Sample Data](./images/sample_data.png)
+*Flux de ventes en temps réel avec horodatage*
+
+#### Dashboard Temps Réel
+![Dashboard](./images/dashbord.png)
+*Agrégation automatique par pays et segment*
+
+#### Requêtes SQL sur Delta Lake
+![Dashboard SQL](./images/dashbord_sql.png)
+*Analyse interactive avec Spark SQL*
+
+### 📈 Métriques de Performance
+
+- **Latence de traitement** : < 3 secondes end-to-end
+- **Débit** : 30 transactions/minute (configurable)
+- **Taille des batches** : Micro-batches de 2 secondes
+- **Stockage Delta** : Compression automatique + versioning
+
+---
+
+## 🔧 Défis et Solutions
+
+### Défi 1 : Gestion des Chemins Windows
+**Problème** : Erreurs de parsing des chemins sur Windows  
+**Solution** : Utilisation de `r"C:/tmp/..."` (raw strings) et normalisation des slashes
+
+### Défi 2 : Checkpointing Kafka
+**Problème** : Perte de données en cas de crash  
+**Solution** : Activation des checkpoints Spark + `startingOffsets="earliest"`
+
+### Défi 3 : Performances du Dashboard
+**Problème** : Lectures répétées coûteuses  
+**Solution** : Caching Spark + agrégations pré-calculées dans Silver
+
+### Défi 4 : Compatibilité des Versions
+**Problème** : Incompatibilités Spark/Delta/Kafka  
+**Solution** : Utilisation de packages Maven coordonnés (version 3.5.0 partout)
+
+---
+
+## 🚀 Améliorations Futures
+
+### Court Terme
+- [ ] Ajout de **schemas evolution** pour Delta Lake
+- [ ] Implémentation de **alertes** sur seuils métier
+- [ ] Dashboard **Grafana/Kibana** pour monitoring avancé
+- [ ] Tests unitaires avec **pytest** + mocking
+
+### Moyen Terme
+- [ ] Migration vers **Kafka Streams** pour enrichissement côté streaming
+- [ ] Ajout d'une couche **Gold** (star schema pour BI)
+- [ ] **CI/CD pipeline** avec GitHub Actions
+- [ ] **Containerisation** Docker + Kubernetes
+
+### Long Terme
+- [ ] Passage à **Azure Event Hubs** ou **AWS Kinesis**
+- [ ] Intégration **MLflow** pour scoring temps réel
+- [ ] **Data Quality** checks automatisés (Great Expectations)
+- [ ] **Multi-tenant** architecture
+
+---
+
+## 📚 Ressources et Documentation
+
+- [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
+- [Spark Structured Streaming Guide](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
+- [Delta Lake Documentation](https://docs.delta.io/latest/index.html)
+- [Lakehouse Architecture (Databricks)](https://www.databricks.com/glossary/data-lakehouse)
+
+---
+
+## 👥 Contribution
+
+Les contributions sont les bienvenues ! Merci de :
+
+1. Fork le projet
+2. Créer une branche (`git checkout -b feature/amelioration`)
+3. Commit vos changements (`git commit -m 'Ajout fonctionnalité X'`)
+4. Push vers la branche (`git push origin feature/amelioration`)
+5. Ouvrir une Pull Request
+
+---
+
+## 📄 Licence
+
+Ce projet est à usage **éducatif** dans le cadre du TP 3.  
+Libre d'utilisation avec attribution.
+
+---
+
+## 📧 Contact
+
+Pour toute question ou suggestion :
+- 📩 Email : [votre.email@example.com]
+- 💼 LinkedIn : [Votre Profil]
+- 🐙 GitHub : [@votre-username]
+
+---
+
+<div align="center">
+
+**⭐ Si ce projet vous a été utile, n'hésitez pas à lui donner une étoile ! ⭐**
+
+Fait avec ❤️ et beaucoup de ☕
+
+</div>
+=======
 ```bash
 # Delta Lake
 wget https://repo1.maven.org/maven2/io/delta/delta-core_2.12/2.4.0/delta-core_2.12-2.4.0.jar
@@ -394,3 +621,4 @@ Pour toute question ou suggestion :
 **⭐ Si ce projet vous a été utile, n'hésitez pas à lui donner une étoile ! ⭐**
 
 </div>
+>>>>>>> 86ca2d0cfa54fc72d4a1773f345c09e116392acc
